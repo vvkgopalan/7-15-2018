@@ -20,7 +20,7 @@ import writeRules
 import debug
 import setup
 
-SWITCH_COUNT = 1
+SWITCH_COUNT = 2
 
 def main(p4info_file_path, bmv2_file_path):
     # Instantiate a P4Runtime helper from the p4info file
@@ -34,13 +34,14 @@ def main(p4info_file_path, bmv2_file_path):
         switches = setup.yieldSwitches(count=SWITCH_COUNT, p4info_helper=p4info_helper, bmv2_file_path=bmv2_file_path)
         setup.forwardingPipeline(p4info_helper=p4info_helper, bmv2_file_path=bmv2_file_path, switches=switches)
         
-        # Write the rules that tunnel traffic from h1 to h2
-        writeRules.writeForwarding(p4info_helper, sw=switches[0], port=1,
-                         dst_eth_addr="00:00:00:00:01:02", dst_ip_addr="10.0.1.2")
+        #these lines change from program to program
+         # Write the rules that tunnel traffic from h1 to h2
+        writeRules.writeForwarding(p4info_helper, ingress_sw=switches[0], egress_sw=switches[1], tunnel_id=100,
+                         dst_eth_addr="00:00:00:00:02:02", dst_ip_addr="10.0.2.2")
 
         # Write the rules that tunnel traffic from h2 to h1
-        #writeRules.writeForwarding(p4info_helper, sw=switches[0], port=1,
-        #                 dst_eth_addr="00:00:00:00:01:01", dst_ip_addr="10.0.1.1")
+        writeRules.writeForwarding(p4info_helper, ingress_sw=switches[1], egress_sw=switches[0], tunnel_id=200,
+                         dst_eth_addr="00:00:00:00:01:01", dst_ip_addr="10.0.1.1")
 
         # TODO Uncomment the following two lines to read table entries from s1 and s2
         debug.readTableRules(p4info_helper, switches[0])
