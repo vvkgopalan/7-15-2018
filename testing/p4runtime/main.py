@@ -19,10 +19,7 @@ import p4runtime_lib.helper
 import writeRules
 import debug
 
-
-SWITCH_TO_HOST_PORT = 1
-SWITCH_TO_SWITCH_PORT = 2
-SWITCH_COUNT = 2
+SWITCH_COUNT = 1
 
 def main(p4info_file_path, bmv2_file_path):
     # Instantiate a P4Runtime helper from the p4info file
@@ -48,7 +45,9 @@ def main(p4info_file_path, bmv2_file_path):
         		proto_dump_file=sProto_dump_file)
         	switches.append(sW)
         
+
         for switch in switches:
+        	print switch
         	# Send master arbitration update message to establish this controller as
         	# master (required by P4Runtime before performing any other write operation)
         	switch.MasterArbitrationUpdate()
@@ -61,29 +60,19 @@ def main(p4info_file_path, bmv2_file_path):
         	print "Installed P4 Program using SetForwardingPipelineConfig on switch" + str(count)
         	count = count + 1
 
-        for switch in switches:
-        	writeRules.writeForwardRules(p4info_helper)
+        
 
         # Write the rules that tunnel traffic from h1 to h2
-        writeRules.writeTunnelRules(p4info_helper, ingress_sw=s1, egress_sw=s2, tunnel_id=100,
-                         dst_eth_addr="00:00:00:00:02:02", dst_ip_addr="10.0.2.2")
+        writeRules.writeForwarding(p4info_helper, sw=switches[0], port=2,
+                         dst_eth_addr="00:00:00:00:01:02", dst_ip_addr="10.0.1.2")
 
         # Write the rules that tunnel traffic from h2 to h1
-        writeRules.writeTunnelRules(p4info_helper, ingress_sw=s2, egress_sw=s1, tunnel_id=200,
+        writeRules.writeForwarding(p4info_helper, sw=switches[0], port=1,
                          dst_eth_addr="00:00:00:00:01:01", dst_ip_addr="10.0.1.1")
 
         # TODO Uncomment the following two lines to read table entries from s1 and s2
-        # readTableRules(p4info_helper, s1)
-        # readTableRules(p4info_helper, s2)
-
-        # Print the tunnel counters every 2 seconds
-        while True:
-            sleep(2)
-            print '\n----- Reading tunnel counters -----'
-            debug.printCounter(p4info_helper, s1, "MyIngress.ingressTunnelCounter", 100)
-            debug.printCounter(p4info_helper, s2, "MyIngress.egressTunnelCounter", 100)
-            debug.printCounter(p4info_helper, s2, "MyIngress.ingressTunnelCounter", 200)
-            debug.printCounter(p4info_helper, s1, "MyIngress.egressTunnelCounter", 200)
+        debug.readTableRules(p4info_helper, switches[0])
+        
 
     except KeyboardInterrupt:
         print " Shutting down."

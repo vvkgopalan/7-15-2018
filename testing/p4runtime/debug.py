@@ -1,8 +1,19 @@
+#!/usr/bin/env python2
+import argparse
+import grpc
+import os
+import sys
+from time import sleep
 
+# Import P4Runtime lib from parent utils dir
+# Probably there's a better way of doing this.
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                 '../../utils/'))
 
-
-
-
+import p4runtime_lib.bmv2
+from p4runtime_lib.switch import ShutdownAllSwitchConnections
+import p4runtime_lib.helper
 
 def readTableRules(p4info_helper, sw):
     """
@@ -20,7 +31,7 @@ def readTableRules(p4info_helper, sw):
             print entry
             print '-----'
 
-
+#only for switch to switch connections
 def printCounter(p4info_helper, sw, counter_name, index):
     """
     Reads the specified counter at the specified index from the switch. In our
