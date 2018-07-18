@@ -18,6 +18,7 @@ import p4runtime_lib.helper
 #import modules
 import writeRules
 import debug
+import setup
 
 SWITCH_COUNT = 1
 
@@ -30,45 +31,16 @@ def main(p4info_file_path, bmv2_file_path):
         # Create a switch connection object for each switch present in the system.
         # this is backed by a P4Runtime gRPC connection.
         # Also, dump all P4Runtime messages sent to switch to given txt files.
-        switches = []
-
-        #make a list of switches
-        for i in range(SWITCH_COUNT):
-        	sName = "s" + str(i+1)
-        	sAddress = '127.0.0.1:5005' + str(i+1)
-        	sDevice_id=i
-        	sProto_dump_file='logs/s'+str(i+1)+'-p4runtime-requests.txt'
-        	sW = p4runtime_lib.bmv2.Bmv2SwitchConnection(
-        		name=sName,
-        		address=sAddress,
-        		device_id=sDevice_id,
-        		proto_dump_file=sProto_dump_file)
-        	switches.append(sW)
+        switches = setup.yieldSwitches(count=SWITCH_COUNT, p4info_helper=p4info_helper, bmv2_file_path=bmv2_file_path)
+        setup.forwardingPipeline(p4info_helper=p4info_helper, bmv2_file_path=bmv2_file_path, switches=switches)
         
-
-        for switch in switches:
-        	print switch
-        	# Send master arbitration update message to establish this controller as
-        	# master (required by P4Runtime before performing any other write operation)
-        	switch.MasterArbitrationUpdate()
-
-        count = 1
-        for switch in switches:
-        	# Install the P4 program on the switches
-        	switch.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                       bmv2_json_file_path=bmv2_file_path)
-        	print "Installed P4 Program using SetForwardingPipelineConfig on switch" + str(count)
-        	count = count + 1
-
-        
-
         # Write the rules that tunnel traffic from h1 to h2
-        writeRules.writeForwarding(p4info_helper, sw=switches[0], port=2,
+        writeRules.writeForwarding(p4info_helper, sw=switches[0], port=1,
                          dst_eth_addr="00:00:00:00:01:02", dst_ip_addr="10.0.1.2")
 
         # Write the rules that tunnel traffic from h2 to h1
-        writeRules.writeForwarding(p4info_helper, sw=switches[0], port=1,
-                         dst_eth_addr="00:00:00:00:01:01", dst_ip_addr="10.0.1.1")
+        #writeRules.writeForwarding(p4info_helper, sw=switches[0], port=1,
+        #                 dst_eth_addr="00:00:00:00:01:01", dst_ip_addr="10.0.1.1")
 
         # TODO Uncomment the following two lines to read table entries from s1 and s2
         debug.readTableRules(p4info_helper, switches[0])
