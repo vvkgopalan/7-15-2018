@@ -138,18 +138,11 @@ control MyIngress(inout headers hdr,
         egressTunnelCounter.count((bit<32>) hdr.myTunnel.dst_id);
     }
 
-    action myTunnel_control(){
-        standard_metadata.egress_spec = 0;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        hdr.ethernet.dstAddr = 50050;
-    }
-
     action ipv4_control(){
         standard_metadata.egress_spec = 0;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        hdr.ethernet.dstAddr = 50050;
+        hdr.ethernet.dstAddr = 000000000022;
     }
 
     table ipv4_lpm {
@@ -175,10 +168,10 @@ control MyIngress(inout headers hdr,
             myTunnel_forward;
             myTunnel_egress;
             drop;
-            myTunnel_control;
+            ipv4_control;
         }
         size = 1024;
-        default_action = myTunnel_control();
+        default_action = ipv4_control();
     }
 
     apply {
