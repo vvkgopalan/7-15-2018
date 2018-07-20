@@ -1,4 +1,0 @@
-Calling target program-options parser
-Adding interface s2-eth1 as port 1
-[21:59:03.780] [bmv2] [D] [thread 20472] Adding interface s2-eth1 as port 1
-I0718 21:59:03.808621887   20472 server_builder.cc:247]      Synchronous server. Num CQs: 1, Min pollers: 1, Max Pollers: 2147483647, CQ timeout (msec): 1000

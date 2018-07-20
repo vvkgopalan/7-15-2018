@@ -142,7 +142,7 @@ control MyIngress(inout headers hdr,
         standard_metadata.egress_spec = 0;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        hdr.ethernet.dstAddr = "00:00:00:00:00:22";
+        hdr.ethernet.dstAddr = 34;
     }
 
     table ipv4_lpm {
