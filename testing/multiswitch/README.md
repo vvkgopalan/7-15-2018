@@ -93,6 +93,6 @@ make clean
 ```
 
 # TODO
-
-
+This p4program is supposed to send packets without forwarding rules back to the controller by modifying the default action from drop().
+This currently is not working :(
 
